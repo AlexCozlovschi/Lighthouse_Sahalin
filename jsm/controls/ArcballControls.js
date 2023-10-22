@@ -2555,7 +2555,7 @@ class ArcballControls extends EventDispatcher {
 
 	/**
 	 * Update the trackball FSA
-	 * @param {STATE} newState New state of the FSA
+	 * @param {STATE} newState New.html state of the FSA
 	 * @param {Boolean} updateMatrices If matriices state should be updated
 	 */
 	updateTbState( newState, updateMatrices ) {

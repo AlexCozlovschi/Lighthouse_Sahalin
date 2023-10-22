@@ -3250,7 +3250,7 @@ class GLTFParser {
 	 * Assigns final material to a Mesh, Line, or Points instance. The instance
 	 * already has a material (generated from the glTF material options alone)
 	 * but reuse of the same glTF material may require multiple threejs materials
-	 * to accommodate different primitive types, defines, etc. New materials will
+	 * to accommodate different primitive types, defines, etc. New.html materials will
 	 * be created if necessary, and reused from a cache.
 	 * @param  {Object3D} mesh Mesh, Line, or Points instance.
 	 */

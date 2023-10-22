@@ -9,10 +9,8 @@
 <body>
 
 <div id="container"></div>
-
-
 <div id="info">
-  <a href="Inside.html" target="_blank" rel="noopener noreferrer">Go inside</a>
+  <a href="https://threejs.org" target="_blank" rel="noopener"></a>
 </div>
 
 <!-- Import maps polyfill -->
@@ -22,7 +20,7 @@
 <script type="importmap">
 			{
 				"imports": {
-					"three": "/build/three.module.js",
+					"three": "/Lighthouse_Sahalin/build/three.module.js",
 					"three/addons/": "./jsm/"
 				}
 			}
@@ -36,6 +34,8 @@
   import { Water } from 'three/addons/objects/Water.js';
   import { Sky } from 'three/addons/objects/Sky.js';
   import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+  import { FlyControls } from 'three/addons/controls/FlyControls.js';
+
 
 
   let container, stats;
@@ -99,8 +99,8 @@
 
     scene = new THREE.Scene();
 
-    camera = new THREE.PerspectiveCamera( 55, window.innerWidth / window.innerHeight, 1, 20000 );
-    camera.position.set( 30, 30, 100 );
+    camera = new THREE.PerspectiveCamera( 55, window.innerWidth / window.innerHeight, 2, 20000 );
+    camera.position.set( 0,0, 0 );
 
     //
 
@@ -129,15 +129,15 @@
     );
     initSky();
     water.rotation.x = - Math.PI / 2;
-
-    scene.add( water );
+    water.position.y = - 300;
+    scene.add(water );
     //		updateSun();
 
     const loader = new GLTFLoader();
     loader.load('mAILC.glb', function(gltf) {
       mesh = gltf.scene;
-      mesh.scale.set(20, 20,20); // Scale if necessary
-      mesh.position.set(0, 18, 0); // Reposition
+      mesh.scale.set(1100, 1100,1100); // Scale if necessary
+      mesh.position.set(-100, 0, -350); // Reposition
       scene.add(mesh);
     });
 
@@ -152,7 +152,23 @@
 
     //lights
 
+    const sphere = new THREE.SphereGeometry( 1, 16, 8 );
 
+    light1 = new THREE.PointLight( 0xfffffff, 40000 );
+    light1.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0xfffffff } ) ) );
+    scene.add( light1 );
+
+    light2 = new THREE.PointLight( 0xffffff, 40000 );
+    light2.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0xfffffff } ) ) );
+    scene.add( light2 );
+
+    light3 = new THREE.PointLight( 0xffffff, 40000 );
+    light3.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0xfffffff } ) ) );
+    scene.add( light3 );
+
+    light4 = new THREE.PointLight( 0xffffff, 40000 );
+    light4.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0xfffffff } ) ) );
+    scene.add( light4 );
 
 
     const pointLight = new THREE.PointLight(0xffffff, 2500, 1000);  // Color, intensity, range
@@ -168,16 +184,26 @@
     scene.add(pointLight3);
 
     //
-
+    //
     controls = new OrbitControls( camera, renderer.domElement );
-    controls.maxPolarAngle = Math.PI * 0.495;
+    controls.minPolarAngle = 0;
+    controls.maxPolarAngle = Math.PI ;
     controls.target.set( 0, 10, 0 );
-    controls.minDistance = 40.0;
+    controls.minDistance = -200.0;
     controls.maxDistance = 200.0;
     controls.update();
+    //
+    // const controls = new FlyControls(camera, renderer.domElement);
+    //
+    // controls.movementSpeed = 1000;
+    // controls.rollSpeed = Math.PI / 10;
 
-
-
+    // const controls = new PointerLockControls(camera, document.body);
+    // scene.add(controls.getObject());
+    //
+    // document.addEventListener('click', function() {
+    //   controls.lock();
+    // }, false);
     window.addEventListener( 'resize', onWindowResize );
 
   }
@@ -201,7 +227,7 @@
 
   function render() {
 
-    const time = performance.now() * 0.0001;
+    const time = performance.now() * 0.001;
 
     mesh.position.y =  18 + Math.sin( time )*0.4 ;
     //mesh.rotation.x = time * 0.5;
@@ -218,20 +244,21 @@
     // light1.position.y =  Math.cos( time * 0.5 ) * 30 + 50;
     // light1.position.z =  -2
 
-    // light2.position.x = Math.cos( time * 0.3 ) * 30;
-    // light2.position.y = Math.sin( time * 0.5 ) * 40;
-    // light2.position.z = Math.sin( time * 0.7 ) * 15;
-    //
-    // light3.position.x = Math.sin( time * 0.7 ) * 30;
-    // light3.position.y = Math.cos( time * 0.3 ) * 40;
-    // light3.position.z = Math.sin( time * 0.5 ) * 30;
-    //
-    // light4.position.x = Math.sin( time * 0.3 ) * 30;
-    // light4.position.y = Math.cos( time * 0.7 ) * 40;
-    // light4.position.z = Math.sin( time * 0.5 ) * 30;
+    light2.position.x = Math.cos( time * 0.3 ) * 160;  // 30 * 2
+    light2.position.y = Math.sin( time * 0.5 ) * 180;  // 40 * 2
+    light2.position.z = Math.sin( time * 0.7 ) * 130;  // 15 * 2
+
+    light3.position.x = Math.sin( time * 0.7 ) * 160;  // 30 * 2
+    light3.position.y = Math.cos( time * 0.3 ) * 180;  // 40 * 2
+    light3.position.z = Math.sin( time * 0.5 ) * 160;  // 30 * 2
+
+    light4.position.x = Math.sin( time * 0.3 ) * 160;  // 30 * 2
+    light4.position.y = Math.cos( time * 0.7 ) * 180;  // 40 * 2
+    light4.position.z = Math.sin( time * 0.5 ) * 160;  // 30 * 2
 
 
-    effectController.elevation = Math.sin(time) -2;
+
+    effectController.elevation = Math.sin(time) +3;
 
     const uniforms = sky.material.uniforms;
     uniforms[ 'turbidity' ].value = effectController.turbidity;

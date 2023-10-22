@@ -86,7 +86,7 @@ function ParserState() {
 
 					const previous = this._finalize( false );
 
-					// New usemtl declaration overwrites an inherited material, except if faces were declared
+					// New.html usemtl declaration overwrites an inherited material, except if faces were declared
 					// after the material, then it must be preserved for proper MultiMaterial continuation.
 					if ( previous && ( previous.inherited || previous.groupCount <= 0 ) ) {
 

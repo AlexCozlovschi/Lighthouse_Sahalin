@@ -69,10 +69,10 @@ function Data(source, dest) {
   this.sourceIndex = 0;
   this.tag = 0;
   this.bitcount = 0;
-  
+
   this.dest = dest;
   this.destLen = 0;
-  
+
   this.ltree = new Tree();  /* dynamic length/symbol tree */
   this.dtree = new Tree();  /* dynamic distance tree */
 }
@@ -214,7 +214,7 @@ function tinf_decode_symbol(d, t) {
     d.tag |= d.source[d.sourceIndex++] << d.bitcount;
     d.bitcount += 8;
   }
-  
+
   var sum = 0, cur = 0, len = 0;
   var tag = d.tag;
 
@@ -227,7 +227,7 @@ function tinf_decode_symbol(d, t) {
     sum += t.table[len];
     cur -= t.table[len];
   } while (cur >= 0);
-  
+
   d.tag = tag;
   d.bitcount -= len;
 
@@ -338,7 +338,7 @@ function tinf_inflate_block_data(d, lt, dt) {
 function tinf_inflate_uncompressed_block(d) {
   var length, invlength;
   var i;
-  
+
   /* unread from bitbuffer */
   while (d.bitcount > 8) {
     d.sourceIndex--;
@@ -411,7 +411,7 @@ function tinf_uncompress(source, dest) {
     else
       { return d.dest.subarray(0, d.destLen); }
   }
-  
+
   return d.dest;
 }
 
@@ -6335,7 +6335,7 @@ var unicodeRanges = [
     {begin: 0xE0000, end: 0xE007F}, // Tags
     {begin: 0x1900, end: 0x194F}, // Limbu
     {begin: 0x1950, end: 0x197F}, // Tai Le
-    {begin: 0x1980, end: 0x19DF}, // New Tai Lue
+    {begin: 0x1980, end: 0x19DF}, // New.html Tai Lue
     {begin: 0x1A00, end: 0x1A1F}, // Buginese
     {begin: 0x2C00, end: 0x2C5F}, // Glagolitic
     {begin: 0x2D30, end: 0x2D7F}, // Tifinagh

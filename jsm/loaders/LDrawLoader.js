@@ -838,7 +838,7 @@ class LDrawParsedCache {
 					// Save previous embedded file in the cache
 					this.setData( currentEmbeddedFileName, currentEmbeddedText );
 
-					// New embedded text file
+					// New.html embedded text file
 					currentEmbeddedFileName = line.substring( 7 );
 					currentEmbeddedText = '';
 

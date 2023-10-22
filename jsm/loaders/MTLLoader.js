@@ -120,7 +120,7 @@ class MTLLoader extends Loader {
 
 			if ( key === 'newmtl' ) {
 
-				// New material
+				// New.html material
 
 				info = { name: value };
 				materialsInfo[ value ] = info;

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title></title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link type="text/css" rel="stylesheet" href="main.css">
+</head>
+<body>
+
+<div id="container"></div>
+<div id="info">
+	<a href="https://threejs.org" target="_blank" rel="noopener"></a>
+</div>
+
+<!-- Import maps polyfill -->
+<!-- Remove this when import maps will be widely supported -->
+<script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+
+<script type="importmap">
+			{
+				"imports": {
+					"three": "/Lighthouse_Sahalin/build/three.module.js",
+					"three/addons/": "./jsm/"
+				}
+			}
+		</script>
+<script type="module">
+
+	import * as THREE from 'three';
+
+
+	import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+	import { Water } from 'three/addons/objects/Water.js';
+	import { Sky } from 'three/addons/objects/Sky.js';
+	import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+
+	let container, stats;
+	let camera, scene, renderer;
+	let controls, water, mesh;
+	let light1, light2, light3, light4;
+	let sky, sun;
+
+
+	init();
+	animate();
+	var effectController = {
+		turbidity: 10,
+		rayleigh: 3,
+		mieCoefficient: 0.005,
+		mieDirectionalG: 0.7,
+		elevation: 2,
+		azimuth: 180,
+		exposure: renderer.toneMappingExposure
+	};
+	function initSky() {
+
+		// Add Sky
+		sky = new Sky();
+		sky.scale.setScalar(450000);
+		scene.add(sky);
+
+		sun = new THREE.Vector3();
+
+		/// GUI
+
+		effectController = {
+			turbidity: 10,
+			rayleigh: 10,
+			mieCoefficient: 0.005,
+			mieDirectionalG: 0.7,
+			elevation: 2,
+			azimuth: 180,
+			exposure: renderer.toneMappingExposure
+		};
+	}
+
+	const pmremGenerator = new THREE.PMREMGenerator( renderer );
+	const sceneEnv = new THREE.Scene();
+
+	let renderTarget;
+
+
+	function init() {
+
+		container = document.getElementById( 'container' );
+
+		renderer = new THREE.WebGLRenderer();
+		renderer.setPixelRatio( window.devicePixelRatio );
+		renderer.setSize( window.innerWidth, window.innerHeight );
+		renderer.toneMapping = THREE.ACESFilmicToneMapping;
+		renderer.toneMappingExposure = 0.5;
+		container.appendChild( renderer.domElement );
+
+		//
+
+		scene = new THREE.Scene();
+
+		camera = new THREE.PerspectiveCamera( 55, window.innerWidth / window.innerHeight, 1, 20000 );
+		camera.position.set( 30, 30, 100 );
+
+		//
+
+		sun = new THREE.Vector3();
+
+		// Water
+
+		const waterGeometry = new THREE.PlaneGeometry( 10000, 10000 );
+
+		water = new Water(
+				waterGeometry,
+				{
+					textureWidth: 512,
+					textureHeight: 512,
+					waterNormals: new THREE.TextureLoader().load( 'textures/waternormals.jpg', function ( texture ) {
+
+						texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+
+					} ),
+					sunDirection: new THREE.Vector3(),
+					sunColor: 0xffffff,
+					waterColor: 0x001e0f,
+					distortionScale: 3.7,
+					fog: scene.fog !== undefined
+				}
+		);
+		initSky();
+		water.rotation.x = - Math.PI / 2;
+
+		scene.add( water );
+		//...
+		//		updateSun();
+//lights
+		const loader = new GLTFLoader();
+		loader.load('mAILC.glb', function(gltf) {
+			mesh = gltf.scene;
+			mesh.scale.set(20, 20,20); // Scale if necessary
+			mesh.position.set(0, 18, 0); // Reposition
+			scene.add(mesh);
+		});
+
+		// loader.load('sea_rock_free.glb', function(gltf) {
+		// 	mesh = gltf.scene;
+		// 	mesh.scale.set(20, 20,20); // Scale if necessary
+		// 	mesh.position.set(25, 0, 10); // Reposition
+		//      // Rotate appropriately
+		// 	mesh.name = "sphere"
+		// 	scene.add(mesh);
+		// });
+
+		const sphere = new THREE.SphereGeometry( 0.5, 16, 8 );
+
+		light1 = new THREE.PointLight( 0xfffffff, 400 );
+		light1.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0xfffffff } ) ) );
+		scene.add( light1 );
+
+		light2 = new THREE.PointLight( 0xffffff, 400 );
+		light2.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0xfffffff } ) ) );
+		scene.add( light2 );
+
+		light3 = new THREE.PointLight( 0xffffff, 400 );
+		light3.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0xfffffff } ) ) );
+		scene.add( light3 );
+
+		light4 = new THREE.PointLight( 0xffffff, 400 );
+		light4.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0xfffffff } ) ) );
+		scene.add( light4 );
+
+
+		const pointLight = new THREE.PointLight(0xffffff, 2500, 1000);  // Color, intensity, range
+		pointLight.position.set(15, 60, 15); // x, y, z
+		scene.add(pointLight);
+
+		var pointLight2 = new THREE.PointLight(0xffffff, 200, 1000);  // Color, intensity, range
+		pointLight2.position.set(25, 10, 25); // x, y,
+		scene.add(pointLight2);
+
+		var pointLight3 = new THREE.PointLight(0xffffff, 300, 1000);  // Color, intensity, range
+		pointLight3.position.set(-10 ,30, 0); // x, y,
+		scene.add(pointLight3);
+
+		//
+
+		controls = new OrbitControls( camera, renderer.domElement );
+		controls.maxPolarAngle = Math.PI * 0.495;
+		controls.target.set( 0, 10, 0 );
+		controls.minDistance = 40.0;
+		controls.maxDistance = 200.0;
+		controls.update();
+
+
+
+		window.addEventListener( 'resize', onWindowResize );
+
+	}
+
+	function onWindowResize() {
+
+		camera.aspect = window.innerWidth / window.innerHeight;
+		camera.updateProjectionMatrix();
+
+		renderer.setSize( window.innerWidth, window.innerHeight );
+
+	}
+
+	function animate() {
+
+		requestAnimationFrame( animate );
+		render();
+		//stats.update();
+
+	}
+
+
+	function render() {
+
+		const time = performance.now() * 0.0001;
+
+		mesh.position.y =  18 + Math.sin( time )*0.4 ;
+		//mesh.rotation.x = time * 0.5;
+		//mesh.rotation.z = time * 0.1;
+		//parameters.elevation = 0.5 + Math.sin( time )*0.1 ;
+		//mesh.rotation.y = time * 0.05;
+		water.material.uniforms[ 'time' ].value += 1.0 / 60.0;
+		water.position.y = Math.sin( time * 0.5 ) * 40;
+		// lights animation
+		//parameters.elevation = Math.sin(time)
+		//...
+
+
+		//
+		// light1.position.x =  -2;
+		// light1.position.y =  Math.cos( time * 0.5 ) * 30 + 50;
+		// light1.position.z =  -2
+		//
+		light2.position.x = Math.cos( time * 0.3 ) * 30;
+		light2.position.y = Math.sin( time * 0.5 ) * 40;
+		light2.position.z = Math.sin( time * 0.7 ) * 15;
+
+		light3.position.x = Math.sin( time * 0.7 ) * 30;
+		light3.position.y = Math.cos( time * 0.3 ) * 40;
+		light3.position.z = Math.sin( time * 0.5 ) * 30;
+
+		light4.position.x = Math.sin( time * 0.3 ) * 30;
+		light4.position.y = Math.cos( time * 0.7 ) * 40;
+		light4.position.z = Math.sin( time * 0.5 ) * 30;
+
+//...
+
+		effectController.elevation = Math.sin(time) -2;
+
+		const uniforms = sky.material.uniforms;
+		uniforms[ 'turbidity' ].value = effectController.turbidity;
+		uniforms[ 'rayleigh' ].value = effectController.rayleigh;
+		uniforms[ 'mieCoefficient' ].value = effectController.mieCoefficient;
+		uniforms[ 'mieDirectionalG' ].value = effectController.mieDirectionalG;
+
+		const phi = THREE.MathUtils.degToRad( 90 - effectController.elevation );
+		const theta = THREE.MathUtils.degToRad( effectController.azimuth );
+
+		sun.setFromSphericalCoords( 1, phi, theta );
+
+		uniforms[ 'sunPosition' ].value.copy( sun );
+
+		renderer.toneMappingExposure = effectController.exposure;
+		renderer.render( scene, camera );
+
+
+
+	}
+
+</script>
+</body>
+</html>
