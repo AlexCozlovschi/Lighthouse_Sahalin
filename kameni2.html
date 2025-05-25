@@ -35,33 +35,40 @@
   camera.position.set(0, 1.5, 3);
   controls.update();
 
-  const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.5);
-  scene.add(light);
+  // 💡 Ambient + Hemisphere
+  const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.5);
+  scene.add(hemiLight);
 
-  // Mirror setup
+  // 💡 Add strong directional light to shine on the front
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
+  directionalLight.position.set(0, 1, 3); // Aim from camera direction
+  scene.add(directionalLight);
+
+  // Mirror setup (optional if using envMap)
   const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(128);
   const cubeCamera = new THREE.CubeCamera(0.1, 10, cubeRenderTarget);
   scene.add(cubeCamera);
 
-  // Video texture
+  // 🎥 VIDEO TEXTURE
   const video = document.getElementById('video');
   video.play();
   const videoTexture = new THREE.VideoTexture(video);
 
-  // Front material: metallic mirror (or just set color)
+  // 🎨 MATERIALS
   const frontMaterial = new THREE.MeshStandardMaterial({
+    color: 0xaaaaaa,
     metalness: 1,
-    roughness: 0,
-    envMap: cubeRenderTarget.texture,
-    side: THREE.FrontSide // FRONT only
+    roughness: 0.2,
+    side: THREE.FrontSide
+    // envMap: cubeRenderTarget.texture, // enable if you want real reflection
   });
 
-  // Back material: video
   const backMaterial = new THREE.MeshBasicMaterial({
     map: videoTexture,
-    side: THREE.BackSide // BACK only
+    side: THREE.BackSide
   });
 
+  // 🧱 Load GLB Model
   const loader = new GLTFLoader();
   loader.load('piatra.glb', (gltf) => {
     const model = gltf.scene;
@@ -72,10 +79,10 @@
       if (child.isMesh && child.name === "Stein_1_reduziert001") {
         console.log("Target mesh:", child.name);
 
-        // FRONT mesh
+        // Apply front material
         child.material = frontMaterial;
 
-        // BACK mesh (clone + flip)
+        // Clone for back material
         const backMesh = child.clone();
         backMesh.material = backMaterial;
         scene.add(backMesh);
@@ -85,7 +92,7 @@
 
   function animate() {
     requestAnimationFrame(animate);
-    cubeCamera.update(renderer, scene); // for mirror
+    cubeCamera.update(renderer, scene); // Optional if using envMap
     controls.update();
     renderer.render(scene, camera);
   }
