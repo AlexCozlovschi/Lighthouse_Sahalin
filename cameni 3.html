@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Front: Mirror / Back: Video</title>
+    <style>body { margin: 0; background: black; }</style>
+    <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+<body>
+
+<video id="video" style="display:none;" autoplay loop muted playsinline>
+    <source src="video_craniu.mp4" type="video/mp4">
+</video>
+
+<script type="module">
+    import * as THREE from 'three';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    camera.position.set(0, 1.5, 3);
+    controls.update();
+
+    // 💡 LIGHTING
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.5);
+    hemiLight.position.set(0, 20, 0);
+    scene.add(hemiLight);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+    scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
+    dirLight.position.set(5, 10, 5);
+    scene.add(dirLight);
+
+    // 🌐 Cube Camera for mirror reflection
+    const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(128);
+    const cubeCamera = new THREE.CubeCamera(0.1, 10, cubeRenderTarget);
+    scene.add(cubeCamera);
+
+    // 🎥 VIDEO TEXTURE
+    const video = document.getElementById('video');
+    video.play();
+    const videoTexture = new THREE.VideoTexture(video);
+
+    // 🎨 MATERIALS
+    const frontMaterial = new THREE.MeshStandardMaterial({
+        metalness: 1,
+        roughness: 0.1,
+        envMap: cubeRenderTarget.texture,
+    });
+
+    const backMaterial = new THREE.MeshBasicMaterial({
+        map: videoTexture,
+        side: THREE.BackSide
+    });
+
+    // 📦 LOAD MODEL
+    const loader = new GLTFLoader();
+    loader.load('test.glb', (gltf) => {
+        const model = gltf.scene;
+        scene.add(model);
+
+        model.traverse((child) => {
+            if (child.isMesh) {
+                console.log("Mesh found:", child.name);
+
+                if (child.name === "Stein_1_reduziert001") {
+                    child.material = frontMaterial;
+                } else if (child.name === "Stein_1_reduziert002" || child.name.includes("002")) {
+                    child.material = backMaterial;
+                }
+            }
+        });
+    });
+
+    // 🔁 RENDER LOOP
+    function animate() {
+        requestAnimationFrame(animate);
+        cubeCamera.update(renderer, scene);
+        controls.update();
+        renderer.render(scene, camera);
+    }
+
+    animate();
+</script>
+</body>
+</html>
