@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Front = Mirror / Back = Video</title>
+  <style>body { margin: 0; background: black; }</style>
+  <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+
+<video id="video" style="display:none;" autoplay loop muted playsinline>
+  <source src="../../Desktop/New%20folder/video_craniu.mp4" type="video/mp4">
+</video>
+
+<script type="module">
+  import * as THREE from 'three';
+  import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+  import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+
+  const controls = new OrbitControls(camera, renderer.domElement);
+  camera.position.set(0, 1.5, 3);
+  controls.update();
+
+  const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.5);
+  scene.add(light);
+
+  // Mirror setup
+  const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(128);
+  const cubeCamera = new THREE.CubeCamera(0.1, 10, cubeRenderTarget);
+  scene.add(cubeCamera);
+
+  // Video texture
+  const video = document.getElementById('video');
+  video.play();
+  const videoTexture = new THREE.VideoTexture(video);
+
+  // Front material: metallic mirror (or just set color)
+  const frontMaterial = new THREE.MeshStandardMaterial({
+    metalness: 1,
+    roughness: 0,
+    envMap: cubeRenderTarget.texture,
+    side: THREE.FrontSide // FRONT only
+  });
+
+  // Back material: video
+  const backMaterial = new THREE.MeshBasicMaterial({
+    map: videoTexture,
+    side: THREE.BackSide // BACK only
+  });
+
+  const loader = new GLTFLoader();
+  loader.load('piatra.glb', (gltf) => {
+    const model = gltf.scene;
+    model.scale.set(1, 1, 1);
+    scene.add(model);
+
+    model.traverse((child) => {
+      if (child.isMesh && child.name === "Stein_1_reduziert001") {
+        console.log("Target mesh:", child.name);
+
+        // FRONT mesh
+        child.material = frontMaterial;
+
+        // BACK mesh (clone + flip)
+        const backMesh = child.clone();
+        backMesh.material = backMaterial;
+        scene.add(backMesh);
+      }
+    });
+  });
+
+  function animate() {
+    requestAnimationFrame(animate);
+    cubeCamera.update(renderer, scene); // for mirror
+    controls.update();
+    renderer.render(scene, camera);
+  }
+
+  animate();
+</script>
+</body>
+</html>
